@@ -1,26 +1,19 @@
 
 param (
-    [string]$Token = $env:INPUT_TOKEN,  
-    [string]$Owner = $env:INPUT_OWNER,
-    [string]$Repo = $env:INPUT_REPO,
-    [string]$Pattern = $env:INPUT_PATTERN
+   [string]$pattern = $env:INPUT_PATTERN
 )
-
-
-$headers = @{
-    Authorization = "Bearer $Token"
-}
-
-Write-Host "$Token, $Owner, $Pattern, $Repo"
-
-$prUrl = "https://api.github.com/repos/$Owner/$Repo/pulls"
-$prs = Invoke-RestMethod -Uri $prUrl -Headers $headers
-
-foreach ($pr in $prs) {
-    $prTitle = $pr.title
-    if ($prTitle -match $Pattern) {
-        Write-Host "PR #$($pr.number): Title is valid: $prTitle"
-    } else {
-        Write-Host "PR #$($pr.number): Invalid title: $prTitle"
-    }
+$ErrorActionPreference = "Stop"
+try {
+  
+   $githubContext = $env:GITHUB_CONTEXT | ConvertFrom-Json
+  
+   $prTitle = $githubContext.event.pull_request.title
+   if (-not ($prTitle -match $pattern)) {
+       throw "PR title '$prTitle' does not match the pattern '$pattern'."
+   } else {
+       Write-Output "PR title '$prTitle' matches the pattern '$pattern'."
+   }
+} catch {
+   Write-Error $_.Exception.Message
+   exit 1
 }
