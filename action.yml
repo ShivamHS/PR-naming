@@ -7,6 +7,15 @@ branding:
   color: blue
 
 inputs:
+  token:
+    description: 'GitHub token with repo scope.'
+    required: true
+  owner:
+    description: 'owner of repo.'
+    required: true
+  repo:
+    description: 'The name of the repository.'
+    required: true
   pattern:
     description: 'Keyword to match for deletion.'
     required: true
@@ -15,4 +24,7 @@ runs:
   using: docker
   image: Dockerfile
   args:  
+    - ${{ inputs.token }}
+    - ${{ inputs.owner }}
+    - ${{ inputs.repo }}
     - ${{ inputs.pattern }}
